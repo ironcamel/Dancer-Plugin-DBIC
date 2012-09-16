@@ -6,8 +6,6 @@ use strict;
 use warnings;
 use Dancer::Plugin;
 use DBIx::Class;
-use DBIx::Class::Schema::Loader;
-DBIx::Class::Schema::Loader->naming('v7');
 
 my $schemas = {};
 
@@ -44,6 +42,11 @@ register schema => sub {
         }
         $schemas->{$name} = $schema_class->connect(@conn_info)
     } else {
+        eval { require DBIx::Class::Schema::Loader };
+        if ( my $err = $@ ) {
+            die "error while building schema class on the fly: DBIx::Class::Schema::Loader not available: $err"
+        };
+        DBIx::Class::Schema::Loader->naming('v7');
         $schemas->{$name} = DBIx::Class::Schema::Loader->connect(@conn_info);
     }
 
