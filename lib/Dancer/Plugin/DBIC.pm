@@ -11,7 +11,7 @@ use Module::Load;
 my $schemas = {};
 
 register schema => sub {
-    my $name = shift;
+    my ($dsl, $name) = plugin_args(@_);
     my $cfg = plugin_setting;
 
     if (not defined $name) {
@@ -53,7 +53,7 @@ register schema => sub {
     return $schemas->{$name};
 };
 
-register_plugin;
+register_plugin for_versions => [1,2];
 
 # ABSTRACT: DBIx::Class interface for Dancer applications
 
