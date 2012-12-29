@@ -15,6 +15,7 @@ sub _apply_debug {
     my $schema = shift;
     return $schema unless request && Plack::Middleware::DBIC::QueryLog->can("get_querylog_from_env");
     if (my $debugobj = Plack::Middleware::DBIC::QueryLog->get_querylog_from_env(request->env)) {
+        $schema = $schema->clone;
         $schema->storage->debugobj($debugobj);
         $schema->storage->debug(1);
     }
@@ -166,8 +167,9 @@ Otherwise, you B<must> provide C<schema()> with the name of the database:
 
     my $user = schema('foo')->resultset('User')->find('bob');
 
-If L<Plack::Middleware::DBIC::QueryLog> is in use, its query log object
-will be applied to the schema.
+If L<Plack::Middleware::DBIC::QueryLog> is in use, the schema object
+will be cloned and have the query log object applied to it before it's
+returned.
 
 =head1 SCHEMA GENERATION
 
