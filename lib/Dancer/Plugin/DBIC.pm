@@ -6,10 +6,22 @@ use strict;
 use warnings;
 use utf8;
 use Dancer::Plugin;
+use Dancer qw(request);
 use DBIx::Class;
 use Module::Load;
 
 my $schemas = {};
+
+sub _apply_debug {
+    my $schema = shift;
+    return $schema unless request && Plack::Middleware::DBIC::QueryLog->can("get_querylog_from_env");
+    if (my $debugobj = Plack::Middleware::DBIC::QueryLog->get_querylog_from_env(request->env)) {
+        $schema = $schema->clone;
+        $schema->storage->debugobj($debugobj);
+        $schema->storage->debug(1);
+    }
+    return $schema;
+}
 
 register schema => sub {
     my ($self, $name) = plugin_args(@_);
@@ -25,7 +37,7 @@ register schema => sub {
         }
     }
 
-    return $schemas->{$name} if $schemas->{$name};
+    return _apply_debug($schemas->{$name}) if $schemas->{$name};
 
     my $options = $cfg->{$name} or die "The schema $name is not configured";
 
@@ -51,7 +63,7 @@ register schema => sub {
         $schemas->{$name} = DBIx::Class::Schema::Loader->connect(@conn_info);
     }
 
-    return $schemas->{$name};
+    return _apply_debug($schemas->{$name});
 };
 
 register_plugin for_versions => [1,2];
@@ -156,6 +168,10 @@ named C<default> in the configuration.
 Otherwise, you B<must> provide C<schema()> with the name of the database:
 
     my $user = schema('foo')->resultset('User')->find('bob');
+
+If L<Plack::Middleware::DBIC::QueryLog> is in use, the schema object
+will be cloned and have the query log object applied to it before it's
+returned.
 
 =head1 SCHEMA GENERATION
 
