@@ -4,10 +4,10 @@ use Test::More;
 
 use Dancer qw(:syntax :tests);
 use Dancer::Plugin::DBIC;
-use Dancer::Test;
+use t::lib::TestApp;
+use Dancer::Test apps => [ 't::lib::TestApp' ];
 use DBI;
 use File::Temp qw(tempfile);
-use t::lib::TestApp;
 
 eval { require DBD::SQLite; require DBIx::Class::Schema::Loader };
 if ($@) {
