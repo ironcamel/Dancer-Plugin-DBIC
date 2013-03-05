@@ -1,7 +1,7 @@
 package t::lib::TestApp;
 
-use Dancer;
-use Dancer::Plugin::DBIC;
+use Dancer2;
+use Dancer2::Plugin::DBIC;
 
 get '/' => sub {
     my $total_user = schema->resultset('User')->search();

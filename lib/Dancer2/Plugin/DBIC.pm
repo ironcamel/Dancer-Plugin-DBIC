@@ -1,11 +1,11 @@
-package Dancer::Plugin::DBIC;
+package Dancer2::Plugin::DBIC;
 
 # VERSION
 
 use strict;
 use warnings;
 use utf8;
-use Dancer::Plugin;
+use Dancer2::Plugin;
 use Module::Load;
 
 my $schemas = {};
@@ -63,14 +63,14 @@ register resultset => \&resultset;
 register rset      => \&resultset;
 register_plugin for_versions => [ 1, 2 ];
 
-# ABSTRACT: DBIx::Class interface for Dancer applications
+# ABSTRACT: DBIx::Class interface for Dancer2 applications
 
 =encoding utf8
 
 =head1 SYNOPSIS
 
-    use Dancer;
-    use Dancer::Plugin::DBIC qw(schema resultset rset);
+    use Dancer2;
+    use Dancer2::Plugin::DBIC qw(schema resultset rset);
 
     get '/users/:user_id' => sub {
         my $user = schema('default')->resultset('User')->find(param 'user_id');
@@ -90,7 +90,7 @@ register_plugin for_versions => [ 1, 2 ];
 
 =head1 DESCRIPTION
 
-This plugin makes it very easy to create L<Dancer> applications that interface
+This plugin makes it very easy to create L<Dancer2> applications that interface
 with databases.
 It automatically exports the keyword C<schema> which returns a
 L<DBIx::Class::Schema> object.
@@ -100,7 +100,7 @@ and are lazy loaded the first time they are accessed.
 
 =head1 CONFIGURATION
 
-Configuration can be done in your L<Dancer> config file.
+Configuration can be done in your L<Dancer2> config file.
 This is a minimal example. It defines one database named C<default>:
 
     plugins:
@@ -139,7 +139,7 @@ Remember that you need L<DBIx::Class::Schema::Loader> installed to take
 advantage of that.
 
 The schema_class option, should be a proper Perl package name that
-Dancer::Plugin::DBIC will use as a L<DBIx::Class::Schema> class.
+Dancer2::Plugin::DBIC will use as a L<DBIx::Class::Schema> class.
 Optionally, a database configuation may have user, pass, and options parameters
 as described in the documentation for C<connect()> in L<DBI>.
 

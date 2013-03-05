@@ -1,6 +1,6 @@
 # DESCRIPTION
 
-This plugin makes it very easy to create Dancer applications that interface
+This plugin makes it very easy to create Dancer2 applications that interface
 with databases.
 It automatically exports the keyword `schema` which returns a
 DBIx::Class::Schema object.
@@ -10,11 +10,11 @@ and are lazy loaded the first time they are accessed.
 
 # INSTALLATION
 
-    cpan Dancer::Plugin::DBIC
+    cpan Dancer2::Plugin::DBIC
 
 # DOCUMENTATION
 
-See [Dancer::Plugin::DBIC](https://metacpan.org/module/Dancer::Plugin::DBIC).
+See [Dancer2::Plugin::DBIC](https://metacpan.org/module/Dancer2::Plugin::DBIC).
 Also, after installation, you can view the documentation via `man` or `perldoc`:
 
-    man Dancer::Plugin::DBIC
+    man Dancer2::Plugin::DBIC

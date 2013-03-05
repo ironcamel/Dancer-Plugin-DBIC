@@ -2,10 +2,10 @@ use strict;
 use warnings;
 use Test::More;
 
-use Dancer qw(:syntax :tests);
-use Dancer::Plugin::DBIC;
+use Dancer2 qw(:syntax :tests);
+use Dancer2::Plugin::DBIC;
 use t::lib::TestApp;
-use Dancer::Test apps => [ 't::lib::TestApp' ];
+use Dancer2::Test apps => [ 't::lib::TestApp' ];
 use DBI;
 use File::Temp qw(tempfile);
 

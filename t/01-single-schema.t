@@ -4,8 +4,8 @@ use lib 't/lib';
 use Test::More tests => 4, import => ['!pass'];
 use Test::Exception;
 
-use Dancer qw(:syntax);
-use Dancer::Plugin::DBIC;
+use Dancer2 qw(:syntax);
+use Dancer2::Plugin::DBIC;
 use DBI;
 use File::Temp qw(tempfile);
 
