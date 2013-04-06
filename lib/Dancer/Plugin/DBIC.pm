@@ -39,7 +39,7 @@ sub schema {
     if ($schema_class) {
         $schema_class =~ s/-/::/g;
         eval { load $schema_class };
-        die "Could not load schema_class $schema_class" if $@;
+        die "Could not load schema_class $schema_class: $@" if $@;
         $schemas->{$name} = $schema_class->connect(@conn_info)
     } else {
         my $dbic_loader = 'DBIx::Class::Schema::Loader';
