@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-DBIC
 
+0.1803  2013-10-06
+        Show the root cause when unable to load a schema
+
 0.1802  2013-01-22
         Updated version requirement for Dancer. A newer Dancer is required to
             use the plugin_args() function.
