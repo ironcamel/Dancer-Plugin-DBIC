@@ -18,7 +18,7 @@ if ($@) {
     plan tests => 3;
 }
 
-my (undef, $dbfile) = tempfile(SUFFIX => '.db');
+my (undef, $dbfile) = tempfile SUFFIX => '.db';
 
 set plugins => {
     DBIC => {
@@ -38,6 +38,6 @@ for my $user (@users) { $dbh->do('insert into user values(?,?)', {}, @$user) }
 
 my $user = schema('foo')->resultset('User')->find('bob');
 ok $user, 'Found bob.';
-is $user->age => '40', 'Bob is even older.';
+is $user->age => '40', 'bob is even older';
 
 unlink $dbfile;

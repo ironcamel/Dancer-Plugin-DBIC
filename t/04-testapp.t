@@ -1,53 +1,39 @@
-use strict;
-use warnings;
 use Test::More;
 
+use lib 't/lib';
 use Dancer qw(:syntax :tests);
-use Dancer::Plugin::DBIC;
+use Dancer::Plugin::DBIC qw(rset schema);
 use t::lib::TestApp;
 use Dancer::Test apps => [ 't::lib::TestApp' ];
-use DBI;
-use File::Temp qw(tempfile);
 
-eval { require DBD::SQLite; require DBIx::Class::Schema::Loader };
-if ($@) {
-    plan skip_all =>
-        'DBD::SQLite and DBIx::Class::Schema::Loader required for these tests';
-} else {
-    plan tests => 7;
-}
-
-my (undef, $dbfile) = tempfile(SUFFIX => '.db');
+eval { require DBD::SQLite };
+plan skip_all => 'DBD::SQLite required to run these tests' if $@;
 
 set plugins => {
     DBIC => {
         foo => {
-            dsn =>  "dbi:SQLite:dbname=$dbfile",
-        }
+            schema_class => 'Foo',
+            dsn          =>  'dbi:SQLite:dbname=:memory:',
+        },
     }
 };
 
-my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile");
-
-my @sql = (
-    q/create table users (id INTEGER primary key, name VARCHAR(64))/,
-    q/insert into users values (1, 'sukria')/,
-    q/insert into users values (2, 'bigpresh')/,
-);
-
-$dbh->do($_) for @sql;
+schema->deploy;
+ok rset('User')->create({ name => 'sukria' });
+ok rset('User')->create({ name => 'bigpresh' });
 
 response_status_is    [ GET => '/' ], 200,   "GET / is found";
 response_content_like [ GET => '/' ], qr/2/, "content looks good for /";
 
-response_status_is [ GET => '/user/1' ], 200, 'GET /user/1 is found';
+response_status_is [ GET => '/user/sukria' ], 200, 'GET /user/sukria is found';
 
-response_content_like [ GET => '/user/1' ], qr/sukria/,
-  'content looks good for /user/1';
-response_content_like [ GET => '/user/2' ], qr/bigpresh/,
-  "content looks good for /user/2";
+response_content_like [ GET => '/user/sukria' ], qr/sukria/,
+  'content looks good for /user/sukria';
+response_content_like [ GET => '/user/bigpresh' ], qr/bigpresh/,
+  "content looks good for /user/bigpresh";
 
-response_status_is [ DELETE => '/user/2' ], 200, 'DELETE /user/2 is ok';
+response_status_is [ DELETE => '/user/bigpresh' ], 200,
+    'DELETE /user/bigpresh is ok';
 response_content_like [ GET => '/' ], qr/1/, 'content looks good for /';
 
-unlink $dbfile;
+done_testing;

@@ -1,21 +1,15 @@
 package t::lib::TestApp;
 
 use Dancer;
-use Dancer::Plugin::DBIC;
+use Dancer::Plugin::DBIC qw(rset);
 
-get '/' => sub {
-    my $total_user = schema->resultset('User')->search();
-    $total_user->count();
-};
+get '/' => sub { rset('User')->count };
 
-get '/user/:id' => sub {
-    my $user = schema->resultset('User')->find( params->{id} );
-    $user->name;
-};
+get '/user/:name' => sub { rset('User')->find( param 'name' )->name };
 
-del '/user/:id' => sub {
-    schema->resultset('User')->find( params->{id} )->delete;
-    'ok';
+del '/user/:name' => sub {
+    rset('User')->find( param 'name' )->delete;
+    return 'ok';
 };
 
 1;
