@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use lib 't/lib';
 use Test::More tests => 9, import => ['!pass'];
 use Test::Exception;
 
@@ -9,9 +10,7 @@ use DBI;
 use File::Temp qw(tempfile);
 
 eval { require DBD::SQLite };
-if ($@) {
-    plan skip_all => 'DBD::SQLite required to run these tests';
-}
+plan skip_all => 'DBD::SQLite required to run these tests' if $@;
 
 my (undef, $dbfile1) = tempfile(SUFFIX => '.db');
 my (undef, $dbfile2) = tempfile(SUFFIX => '.db');
@@ -19,9 +18,11 @@ my (undef, $dbfile2) = tempfile(SUFFIX => '.db');
 set plugins => {
     DBIC => {
         foo => {
+            schema_class => 'Foo',
             dsn =>  "dbi:SQLite:dbname=$dbfile1",
         },
         bar => {
+            schema_class => 'Foo',
             dsn =>  "dbi:SQLite:dbname=$dbfile2",
         },
     }
@@ -58,21 +59,23 @@ throws_ok { schema('poo')->resultset('User')->find('bob') }
     qr/schema poo is not configured/, 'Missing schema error thrown';
 
 throws_ok { schema->resultset('User')->find('bob') }
-    qr/The schema default is not configured/, 'Missing default schema error thrown';
+    qr/The schema default is not configured/,
+    'Missing default schema error thrown';
 
 set plugins => {
     DBIC => {
         default => {
+            schema_class => 'Foo',
             dsn =>  "dbi:SQLite:dbname=$dbfile1",
         },
         bar => {
+            schema_class => 'Foo',
             dsn =>  "dbi:SQLite:dbname=$dbfile2",
         },
     }
 };
 
-lives_and {
-    ok schema->resultset('User')->find('bob'), 'Found bob.'
-} 'Default schema';
+lives_and { ok schema->resultset('User')->find('bob'), 'Found bob.' }
+    'Default schema';
 
 unlink $dbfile1, $dbfile2;

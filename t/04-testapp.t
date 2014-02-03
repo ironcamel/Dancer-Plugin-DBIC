@@ -1,22 +1,31 @@
 use strict;
 use warnings;
-use Test::More tests => 7, import => ['!pass'];
+use Test::More;
 
-use Dancer qw(:syntax);
+use Dancer qw(:syntax :tests);
 use Dancer::Plugin::DBIC;
-use Dancer::Test;
+use t::lib::TestApp;
+use Dancer::Test apps => [ 't::lib::TestApp' ];
 use DBI;
 use File::Temp qw(tempfile);
-use t::lib::TestApp;
 
-eval { require DBD::SQLite };
+eval { require DBD::SQLite; require DBIx::Class::Schema::Loader };
 if ($@) {
-    plan skip_all => 'DBD::SQLite required to run these tests';
+    plan skip_all =>
+        'DBD::SQLite and DBIx::Class::Schema::Loader required for these tests';
+} else {
+    plan tests => 7;
 }
 
 my (undef, $dbfile) = tempfile(SUFFIX => '.db');
 
-set plugins => { DBIC => { foo => { dsn => "dbi:SQLite:dbname=$dbfile", }, } };
+set plugins => {
+    DBIC => {
+        foo => {
+            dsn =>  "dbi:SQLite:dbname=$dbfile",
+        }
+    }
+};
 
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile");
 

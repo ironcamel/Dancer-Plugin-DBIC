@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use lib 't/lib';
 use Test::More tests => 4, import => ['!pass'];
 use Test::Exception;
 
@@ -9,15 +10,14 @@ use DBI;
 use File::Temp qw(tempfile);
 
 eval { require DBD::SQLite };
-if ($@) {
-    plan skip_all => 'DBD::SQLite required to run these tests';
-}
+plan skip_all => 'DBD::SQLite required to run these tests' if $@;
 
 my (undef, $dbfile) = tempfile(SUFFIX => '.db');
 
 set plugins => {
     DBIC => {
         foo => {
+            schema_class => 'Foo',
             dsn =>  "dbi:SQLite:dbname=$dbfile",
         },
     }
@@ -31,11 +31,23 @@ ok $dbh->do(q{
 my @users = ( ['bob', 2] );
 for my $user (@users) { $dbh->do('insert into user values(?,?)', {}, @$user) }
 
-my $user = schema->resultset('User')->find('bob');
-ok $user, 'Found bob.';
-is $user->age => '2', 'Bob is a baby.';
+subtest 'schema' => sub {
+    my $user = schema->resultset('User')->find('bob');
+    is $user->age => '2', 'Bob is a baby.';
+    $user = schema('foo')->resultset('User')->find('bob');
+    is $user->age => '2', 'Found Bob via explicit schema name.';
+};
 
-throws_ok { schema('bar')->resultset('User')->find('bob') }
-    qr/schema bar is not configured/, 'Missing schema error thrown';
+subtest 'resultset' => sub {
+    my $user = resultset('User')->find('bob');
+    is $user->age => '2', 'Found Bob via resultset.';
+    $user = rset('User')->find('bob');
+    is $user->age => '2', 'Found Bob via rset.';
+};
+
+subtest 'invalid schema name' => sub {
+    throws_ok { schema('bar')->resultset('User')->find('bob') }
+        qr/schema bar is not configured/, 'Missing schema error thrown';
+};
 
 unlink $dbfile;

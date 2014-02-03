@@ -1,16 +1,21 @@
+# Test dynamic schema loading by not providing a schema_class config option.
+# These tests require DBIx::Class::Schema::Loader to be installed
+
 use strict;
 use warnings;
-use Test::More tests => 3, import => ['!pass'];
+use Test::More;
 
-use Dancer qw(:syntax);
+use Dancer qw(:syntax !pass);
 use Dancer::Plugin::DBIC;
 use DBI;
 use File::Temp qw(tempfile);
-use lib 't/lib';
 
-eval { require DBD::SQLite };
+eval { require DBD::SQLite; require DBIx::Class::Schema::Loader };
 if ($@) {
-    plan skip_all => 'DBD::SQLite required to run these tests';
+    plan skip_all =>
+        'DBD::SQLite and DBIx::Class::Schema::Loader required for these tests';
+} else {
+    plan tests => 3;
 }
 
 my (undef, $dbfile) = tempfile(SUFFIX => '.db');
@@ -18,7 +23,6 @@ my (undef, $dbfile) = tempfile(SUFFIX => '.db');
 set plugins => {
     DBIC => {
         foo => {
-            schema_class => 'Foo',
             dsn =>  "dbi:SQLite:dbname=$dbfile",
         }
     }

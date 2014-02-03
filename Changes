@@ -1,0 +1,37 @@
+Revision history for Dancer-Plugin-DBIC
+
+0.1803  2013-10-06
+        Show the root cause when unable to load a schema
+
+0.1802  2013-01-22
+        Updated version requirement for Dancer. A newer Dancer is required to
+            use the plugin_args() function.
+
+0.1801  2013-01-21
+        Fixed tests to pass on Dancer 2.
+        Thanks Yanick Champoux (https://github.com/yanick)!
+
+0.1800  2013-01-18
+        Added the resultset and rset keywords.
+
+0.1700  2013-01-01
+        Added support for Dancer 2.
+        Thanks Steven Humphrey (https://github.com/shumphrey)!
+
+0.1601  2012-10-01
+        Added logic to skip some tests when DBIx::Class::Schema::Loader is not
+            installed.
+
+0.1600  2012-09-29
+        DBIx::Class::Schema::Loader is now an optional dependency.
+        Thanks Fabrice Gabolde (https://github.com/fgabolde)!
+        Started using Module::Load for dynamically loading modules.
+
+0.1506  2012-04-12
+        When multiple databases are configured, calling schema with no args
+            returns the schema for the databased named 'default'.
+        Thanks Dagfinn Ilmari Mannsåker (https://github.com/ilmari)!
+
+0.1505  2012-02-07
+        Updating POD to warn about dynamic loading of schema classes.
+        Thanks David Precious (https://github.com/bigpresh)!
