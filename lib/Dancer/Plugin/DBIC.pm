@@ -31,6 +31,7 @@ sub schema {
     my @conn_info = $options->{connect_info}
         ? @{$options->{connect_info}}
         : @$options{qw(dsn user pass options)};
+    $conn_info[2] = $options->{password} if defined $options->{password};
 
     warn "The pckg option is deprecated. Please use schema_class instead."
         if $options->{pckg};
@@ -48,6 +49,20 @@ sub schema {
             if $@;
         $dbic_loader->naming('v7');
         $schemas->{$name} = DBIx::Class::Schema::Loader->connect(@conn_info);
+    }
+
+    if (my @read_slaves = @{$options->{read_slaves} // []}) {
+        $schemas->{$name} = my $schema = $schemas->{$name}->clone;
+        $schema->storage_type({'::DBI::Replicated' => {
+            balancer_type =>'::Random'}});
+        $schema->connection(@conn_info);
+        $schema->storage->connect_replicants(map {
+            my @conn_info = $_->{connect_info}
+                ? @{$_->{connect_info}}
+                : @$_{qw(dsn user pass options)};
+            $conn_info[2] = $_->{password} if define $_->{password};
+            [@conn_info]
+        } @read_slaves);
     }
 
     return $schemas->{$name};
@@ -156,6 +171,35 @@ You may also declare your connection information in the following format
             -
               RaiseError: 1
               PrintError: 1
+
+Additionally, you have the ability to configure database read slaves and
+DBIx::Class will simply do the right thing, i.e. issue select statements to one
+of the slaves you have configured using a randomizing strategy issuing all other
+statements to the master.
+
+    plugins:
+      DBIC:
+        default:
+          dsn: dbi:mysql:foo
+          schema_class: Foo::Schema
+          user: sue
+          pass: secret
+          options:
+            RaiseError: 1
+            PrintError: 1
+          read_slaves:
+            -
+              dsn: dbi:mysql:foo;host=db1.example.com
+              user: sue
+              pass: secret
+            -
+              dsn: dbi:mysql:foo;host=db2.example.com
+              user: sue
+              pass: secret
+            -
+              dsn: dbi:mysql:foo;host=db3.example.com
+              user: sue
+              pass: secret
 
 =head1 FUNCTIONS
 
