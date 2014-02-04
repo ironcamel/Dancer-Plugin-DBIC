@@ -1,7 +1,13 @@
 Revision history for Dancer-Plugin-DBIC
 
+0.1900  2014-02-04
+        Added support for schema aliases.
+        Added schema_loader_naming option.
+        Can now provide password instead of pass, to be more DBIC friendly.
+        Simplified tests.
+
 0.1803  2013-10-06
-        Show the root cause when unable to load a schema
+        Show the root cause when unable to load a schema.
 
 0.1802  2013-01-22
         Updated version requirement for Dancer. A newer Dancer is required to
