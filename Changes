@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-DBIC
 
+0.1901  2014-02-04
+        Added SQL::Translator prereq for tests to pass.
+
 0.1900  2014-02-04
         Added support for schema aliases.
         Added schema_loader_naming option.
