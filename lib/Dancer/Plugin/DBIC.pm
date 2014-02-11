@@ -52,7 +52,7 @@ sub schema {
     }
 
     if (my @read_slaves = @{$options->{read_slaves} // []}) {
-        $schemas->{$name} = my $schema = $schemas->{$name}->clone;
+        my $schema = $schemas->{$name}->clone;
         $schema->storage_type({'::DBI::Replicated' => {
             balancer_type =>'::Random'}});
         $schema->connection(@conn_info);
@@ -60,7 +60,7 @@ sub schema {
             my @conn_info = $_->{connect_info}
                 ? @{$_->{connect_info}}
                 : @$_{qw(dsn user pass options)};
-            $conn_info[2] = $_->{password} if define $_->{password};
+            $conn_info[2] = $_->{password} if defined $_->{password};
             [@conn_info]
         } @read_slaves);
     }
