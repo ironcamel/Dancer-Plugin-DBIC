@@ -52,7 +52,7 @@ sub schema {
     }
 
     if (my @read_slaves = @{$options->{read_slaves} // []}) {
-        my $schema = $schemas->{$name}->clone;
+        $schemas->{$name} = my $schema = $schemas->{$name}->clone;
         $schema->storage_type({'::DBI::Replicated' => {
             balancer_type =>'::Random'}});
         $schema->connection(@conn_info);

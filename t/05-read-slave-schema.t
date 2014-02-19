@@ -44,7 +44,13 @@ ok $users->new({name => 'Dopey', time => time})->insert, 'Dopey inserted';
 ok $users->new({name => 'Sleepy', time => time})->insert, 'Sleepy inserted';
 ok $users->new({name => 'Grumpy', time => time})->insert, 'Grumpy inserted';
 ok $users->new({name => 'Sneezy', time => time})->insert, 'Sneezy inserted';
-ok !$users->count, 'Read slaves do not have any data';
-ok $users->search(undef, {force_pool=>'master'})->count, 'Master has data';
+
+for my $i (1..3,1..3) {
+    is $users->search(undef,
+        {force_pool => $users->result_source->storage->read_handler->next_storage})
+            ->count, 0, "read slave #$i has no data";
+}
+
+is $users->search(undef, {force_pool=>'master'})->count, 5, 'Master has the data';
 
 unlink for @dbfiles;
