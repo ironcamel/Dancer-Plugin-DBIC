@@ -1,5 +1,10 @@
 Revision history for Dancer-Plugin-DBIC
 
+0.2000  2014-03-11
+        Added support for database slaves via
+            DBIx::Class::Storage::DBI::Replicated.
+        Thanks to Al Newkirk for the idea and the initial implementation.
+
 0.1901  2014-02-04
         Added SQL::Translator prereq for tests to pass.
 
