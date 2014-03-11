@@ -41,22 +41,33 @@ sub schema {
     warn "The pckg option is deprecated. Please use schema_class instead."
         if $options->{pckg};
     my $schema_class = $options->{schema_class} || $options->{pckg};
+    my $schema;
 
-    if ($schema_class) {
+    if ( $schema_class ) {
         $schema_class =~ s/-/::/g;
         eval { load $schema_class };
         die "Could not load schema_class $schema_class: $@" if $@;
-        $schemas->{$name} = $schema_class->connect(@conn_info);
+        if ( my $replicated = $options->{replicated} ) {
+            $schema = $schema_class->clone;
+            $schema->storage_type([
+                '::DBI::Replicated',
+                { balancer_type => $replicated->{balancer} || '::Random' },
+            ]);
+            $schema->connection( @conn_info );
+            $schema->storage->connect_replicants( @{$replicated->{replicants}});
+        } else {
+            $schema = $schema_class->connect( @conn_info );
+        }
     } else {
         my $dbic_loader = 'DBIx::Class::Schema::Loader';
         eval { load $dbic_loader };
         die "You must provide a schema_class option or install $dbic_loader."
             if $@;
         $dbic_loader->naming( $options->{schema_loader_naming} || 'v7' );
-        $schemas->{$name} = DBIx::Class::Schema::Loader->connect(@conn_info);
+        $schema = DBIx::Class::Schema::Loader->connect(@conn_info);
     }
 
-    return $schemas->{$name};
+    return $schemas->{$name} = $schema;
 };
 
 sub resultset {
@@ -162,6 +173,32 @@ array named C<connect_info>:
             -
               RaiseError: 1
               PrintError: 1
+
+You can also add database read slaves to your configuration with the
+C<replicated> config option.
+This will automatically make your read queries go to a slave and your write
+queries go to the master.
+Keep in mind that this will require additional dependencies:
+L<DBIx::Class::Optional::Dependencies#Storage::Replicated>
+See L<DBIx::Class::Storage::DBI::Replicated> for more details.
+Here is an example configuration that adds two read slaves:
+
+    plugins:
+      DBIC:
+        default:
+          schema_class: Foo
+          dsn: dbi:Pg:dbname=master
+          replicated:
+            balancer_type: ::Random  # defaults to '::Random' if not provided
+            replicants:
+              -
+                - dbi:Pg:dbname=slave1
+                - user1
+                - password1
+              -
+                - dbi:Pg:dbname=slave2
+                - user2
+                - password2
 
 Schema aliases allow you to reference the same underlying database by multiple
 names.
