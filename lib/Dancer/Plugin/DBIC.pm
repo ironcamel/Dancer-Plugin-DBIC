@@ -35,15 +35,15 @@ sub schema {
 
     my @conn_info = $options->{connect_info}
         ? @{$options->{connect_info}}
-        : @$options{qw(dsn user pass options)};
-    $conn_info[2] = $options->{password} if defined $options->{password};
+        : @$options{qw(dsn user password options)};
+    if ( exists $options->{pass} ) {
+        warn "The pass option is deprecated. Use password instead.";
+        $conn_info[2] = $options->{pass};
+    }
 
-    warn "The pckg option is deprecated. Please use schema_class instead."
-        if $options->{pckg};
-    my $schema_class = $options->{schema_class} || $options->{pckg};
     my $schema;
 
-    if ( $schema_class ) {
+    if ( my $schema_class = $options->{schema_class} ) {
         $schema_class =~ s/-/::/g;
         eval { load $schema_class };
         die "Could not load schema_class $schema_class: $@" if $@;
@@ -118,12 +118,18 @@ and are lazy loaded the first time they are accessed.
 =head1 CONFIGURATION
 
 Configuration can be done in your L<Dancer> config file.
-This is a minimal example. It defines one database named C<default>:
+
+=head2 simple example
+
+Here is a simple example. It defines one database named C<default>:
 
     plugins:
       DBIC:
         default:
-          dsn: dbi:SQLite:dbname=some.db
+          dsn: dbi:SQLite:dbname=myapp.db
+          schema_class: MyApp::Schema
+
+=head2 multiple schemas
 
 In this example, there are 2 databases configured named C<default> and C<foo>:
 
@@ -152,13 +158,17 @@ or C<default> schema, respectively.
 If a schema_class option is not provided, then L<DBIx::Class::Schema::Loader>
 will be used to dynamically load the schema by introspecting the database
 corresponding to the dsn value.
-Remember that you need L<DBIx::Class::Schema::Loader> installed to take
-advantage of that.
+You need L<DBIx::Class::Schema::Loader> installed for this to work.
 
-The schema_class option, should be a proper Perl package name that
-Dancer::Plugin::DBIC will use as a L<DBIx::Class::Schema> class.
-Optionally, a database configuation may have user, password, and options
+WARNING: Dynamic loading is not recommended for production environments.
+It is almost always better to provide a schema_class option.
+
+The schema_class option should be the name of your L<DBIx::Class::Schema> class.
+See L</"SCHEMA GENERATION">
+Optionally, a database configuration may have user, password, and options
 parameters as described in the documentation for C<connect()> in L<DBI>.
+
+=head2 connect_info
 
 Alternatively, you may also declare your connection information inside an
 array named C<connect_info>:
@@ -166,6 +176,7 @@ array named C<connect_info>:
     plugins:
       DBIC:
         default:
+          schema_class: MyApp::Schema
           connect_info:
             - dbi:Pg:dbname=foo
             - bob
@@ -173,6 +184,8 @@ array named C<connect_info>:
             -
               RaiseError: 1
               PrintError: 1
+
+=head2 replicated
 
 You can also add database read slaves to your configuration with the
 C<replicated> config option.
@@ -186,7 +199,7 @@ Here is an example configuration that adds two read slaves:
     plugins:
       DBIC:
         default:
-          schema_class: Foo
+          schema_class: MyApp::Schema
           dsn: dbi:Pg:dbname=master
           replicated:
             balancer_type: ::Random  # defaults to '::Random' if not provided
@@ -199,6 +212,8 @@ Here is an example configuration that adds two read slaves:
                 - dbi:Pg:dbname=slave2
                 - user2
                 - password2
+
+=head2 alias
 
 Schema aliases allow you to reference the same underlying database by multiple
 names.
@@ -258,27 +273,16 @@ This is simply an alias for C<resultset>.
 
 =head1 SCHEMA GENERATION
 
-There are two approaches for generating schema classes.
-You may generate your own L<DBIx::Class> classes and set
-the corresponding C<schema_class> setting in your configuration as shown above.
-This is the recommended approach for performance and stability.
-
-It is also possible to have schema classes dynamically generated
-if you omit the C<schema_class> configuration setting.
-This requires you to have L<DBIx::Class::Schema::Loader> installed.
-The C<v7> naming scheme will be used for naming the auto generated classes.
-See L<DBIx::Class::Schema::Loader::Base/naming> for more information about
-naming.
-
-For generating your own schema classes,
-you can use the L<dbicdump> command line tool provided by
+Setting the schema_class option and having proper DBIx::Class classes
+is the recommended approach for performance and stability.
+You can use the L<dbicdump> command line tool provided by
 L<DBIx::Class::Schema::Loader> to help you.
 For example, if your app were named Foo, then you could run the following
 from the root of your project directory:
 
     dbicdump -o dump_directory=./lib Foo::Schema dbi:SQLite:/path/to/foo.db
 
-For that example, your C<schema_class> setting would be C<Foo::Schema>.
+For this example, your C<schema_class> setting would be C<'Foo::Schema'>.
 
 =head1 CONTRIBUTORS
 

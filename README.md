@@ -40,12 +40,18 @@ and are lazy loaded the first time they are accessed.
 # CONFIGURATION
 
 Configuration can be done in your [Dancer](http://search.cpan.org/perldoc?Dancer) config file.
-This is a minimal example. It defines one database named `default`:
+
+## simple example
+
+Here is a simple example. It defines one database named `default`:
 
     plugins:
       DBIC:
         default:
-          dsn: dbi:SQLite:dbname=some.db
+          dsn: dbi:SQLite:dbname=myapp.db
+          schema_class: MyApp::Schema
+
+## multiple schemas
 
 In this example, there are 2 databases configured named `default` and `foo`:
 
@@ -74,13 +80,17 @@ or `default` schema, respectively.
 If a schema\_class option is not provided, then [DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader)
 will be used to dynamically load the schema by introspecting the database
 corresponding to the dsn value.
-Remember that you need [DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader) installed to take
-advantage of that.
+You need [DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader) installed for this to work.
 
-The schema\_class option, should be a proper Perl package name that
-Dancer::Plugin::DBIC will use as a [DBIx::Class::Schema](http://search.cpan.org/perldoc?DBIx::Class::Schema) class.
-Optionally, a database configuation may have user, password, and options
+WARNING: Dynamic loading is not recommended for production environments.
+It is almost always better to provide a schema\_class option.
+
+The schema\_class option should be the name of your [DBIx::Class::Schema](http://search.cpan.org/perldoc?DBIx::Class::Schema) class.
+See ["SCHEMA GENERATION"](#SCHEMA GENERATION)
+Optionally, a database configuration may have user, password, and options
 parameters as described in the documentation for `connect()` in [DBI](http://search.cpan.org/perldoc?DBI).
+
+## connect\_info
 
 Alternatively, you may also declare your connection information inside an
 array named `connect_info`:
@@ -88,6 +98,7 @@ array named `connect_info`:
     plugins:
       DBIC:
         default:
+          schema_class: MyApp::Schema
           connect_info:
             - dbi:Pg:dbname=foo
             - bob
@@ -95,6 +106,8 @@ array named `connect_info`:
             -
               RaiseError: 1
               PrintError: 1
+
+## replicated
 
 You can also add database read slaves to your configuration with the
 `replicated` config option.
@@ -108,7 +121,7 @@ Here is an example configuration that adds two read slaves:
     plugins:
       DBIC:
         default:
-          schema_class: Foo
+          schema_class: MyApp::Schema
           dsn: dbi:Pg:dbname=master
           replicated:
             balancer_type: ::Random  # defaults to '::Random' if not provided
@@ -121,6 +134,8 @@ Here is an example configuration that adds two read slaves:
                 - dbi:Pg:dbname=slave2
                 - user2
                 - password2
+
+## alias
 
 Schema aliases allow you to reference the same underlying database by multiple
 names.
@@ -180,27 +195,16 @@ This is simply an alias for `resultset`.
 
 # SCHEMA GENERATION
 
-There are two approaches for generating schema classes.
-You may generate your own [DBIx::Class](http://search.cpan.org/perldoc?DBIx::Class) classes and set
-the corresponding `schema_class` setting in your configuration as shown above.
-This is the recommended approach for performance and stability.
-
-It is also possible to have schema classes dynamically generated
-if you omit the `schema_class` configuration setting.
-This requires you to have [DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader) installed.
-The `v7` naming scheme will be used for naming the auto generated classes.
-See ["naming" in DBIx::Class::Schema::Loader::Base](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader::Base#naming) for more information about
-naming.
-
-For generating your own schema classes,
-you can use the [dbicdump](http://search.cpan.org/perldoc?dbicdump) command line tool provided by
+Setting the schema\_class option and having proper DBIx::Class classes
+is the recommended approach for performance and stability.
+You can use the [dbicdump](http://search.cpan.org/perldoc?dbicdump) command line tool provided by
 [DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader) to help you.
 For example, if your app were named Foo, then you could run the following
 from the root of your project directory:
 
     dbicdump -o dump_directory=./lib Foo::Schema dbi:SQLite:/path/to/foo.db
 
-For that example, your `schema_class` setting would be `Foo::Schema`.
+For this example, your `schema_class` setting would be `'Foo::Schema'`.
 
 # CONTRIBUTORS
 
