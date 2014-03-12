@@ -1,5 +1,11 @@
 Revision history for Dancer-Plugin-DBIC
 
+0.2001  2014-03-12
+        Skip the replicated tests if the required deps are not installed.
+        Removed the deprecated pckg option.
+        Added a deprecation warning for the pass option.
+        Updated the documentation.
+
 0.2000  2014-03-11
         Added support for database slaves via
             DBIx::Class::Storage::DBI::Replicated.
