@@ -4,7 +4,7 @@ Dancer::Plugin::DBIC - DBIx::Class interface for Dancer applications
 
 # VERSION
 
-version 0.1900
+version 0.2000
 
 # SYNOPSIS
 
@@ -95,6 +95,32 @@ array named `connect_info`:
             -
               RaiseError: 1
               PrintError: 1
+
+You can also add database read slaves to your configuration with the
+`replicated` config option.
+This will automatically make your read queries go to a slave and your write
+queries go to the master.
+Keep in mind that this will require additional dependencies:
+[DBIx::Class::Optional::Dependencies\#Storage::Replicated](http://search.cpan.org/perldoc?DBIx::Class::Optional::Dependencies\#Storage::Replicated)
+See [DBIx::Class::Storage::DBI::Replicated](http://search.cpan.org/perldoc?DBIx::Class::Storage::DBI::Replicated) for more details.
+Here is an example configuration that adds two read slaves:
+
+    plugins:
+      DBIC:
+        default:
+          schema_class: Foo
+          dsn: dbi:Pg:dbname=master
+          replicated:
+            balancer_type: ::Random  # defaults to '::Random' if not provided
+            replicants:
+              -
+                - dbi:Pg:dbname=slave1
+                - user1
+                - password1
+              -
+                - dbi:Pg:dbname=slave2
+                - user2
+                - password2
 
 Schema aliases allow you to reference the same underlying database by multiple
 names.

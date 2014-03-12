@@ -1,13 +1,24 @@
-use Test::More tests => 5;
+use Test::More;
 
 use lib 't/lib';
 use Dancer qw(:syntax set);
 use Dancer::Plugin::DBIC qw(schema rset);
 use DBI;
 use File::Temp qw(tempfile);
+use Module::Load::Conditional qw(can_load);
 
-eval { require DBD::SQLite };
-plan skip_all => 'DBD::SQLite required to run these tests' if $@;
+my $reqs = {
+    'DBD::SQLite'                  => 0,
+    'Moose'                        => 0.98,
+    'MooseX::Types'                => 0.21,
+    'MooseX::Types::LoadableClass' => 0.011,
+};
+
+if ( can_load modules => $reqs ) {
+    plan tests => 5;
+} else {
+    plan skip_all => "required modules to run these tests are not available";
+}
 
 my (undef, $dbfile1) = tempfile(SUFFIX => '.db');
 my (undef, $dbfile2) = tempfile(SUFFIX => '.db');
@@ -41,7 +52,8 @@ schema->deploy;
 ok rset('User')->create({ name => 'bob', age => 30 });
 
 # should find the 40 year old bob from one of the slaves
-is rset('User')->count({ name => 'bob', age => 40 }), 1, 'found bob';
+is rset('User')->count({ name => 'bob', age => 40 }), 1,
+    'found the 40 year old bob in one of the replicants';
 
 # now force the query to use the master db, which has the 30 year old bob
 is rset('User')->count({ name => 'bob', age => 30 }, {force_pool => 'master'}),
