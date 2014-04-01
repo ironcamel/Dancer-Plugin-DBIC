@@ -59,4 +59,14 @@ is rset('User')->count({ name => 'bob', age => 40 }), 1,
 is rset('User')->count({ name => 'bob', age => 30 }, {force_pool => 'master'}),
     1, 'found the 30 year old bob in the master db';
 
+# simulate a slave going down
+unlink $dbfile1;
+is rset('User')->count({ name => 'bob', age => 40 }), 1,
+    'found the 40 year old bob in the remaining replicant';
+
+# simulate all slaves going down
+unlink $dbfile2;
+is rset('User')->count({ name => 'bob', age => 30 }), 1,
+    'gracefully fell back to master';
+
 unlink $dbfile1, $dbfile2, $dbfile3;
