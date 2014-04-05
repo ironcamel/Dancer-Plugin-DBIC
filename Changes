@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-DBIC
 
+0.2100  2014-04-05
+        Added support for ::Replicated options:
+            balancer_args, pool_type, and pool_args
+
 0.2001  2014-03-12
         Skip the replicated tests if the required deps are not installed.
         Removed the deprecated pckg option.

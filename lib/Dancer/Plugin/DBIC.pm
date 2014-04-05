@@ -49,10 +49,13 @@ sub schema {
         die "Could not load schema_class $schema_class: $@" if $@;
         if ( my $replicated = $options->{replicated} ) {
             $schema = $schema_class->clone;
-            $schema->storage_type([
-                '::DBI::Replicated',
-                { balancer_type => $replicated->{balancer} || '::Random' },
-            ]);
+            my %storage_options;
+            my @params = qw( balancer_type balancer_args pool_type pool_args );
+            for my $p ( @params ) {
+                my $value = $replicated->{$p};
+                $storage_options{$p} = $value if defined $value;
+            }
+            $schema->storage_type([ '::DBI::Replicated', \%storage_options ]);
             $schema->connection( @conn_info );
             $schema->storage->connect_replicants( @{$replicated->{replicants}});
         } else {
@@ -202,16 +205,26 @@ Here is an example configuration that adds two read slaves:
           schema_class: MyApp::Schema
           dsn: dbi:Pg:dbname=master
           replicated:
-            balancer_type: ::Random  # defaults to '::Random' if not provided
+            balancer_type: ::Random     # optional
+            balancer_args:              # optional
+                auto_validate_every: 5  # optional
+                master_read_weight:1    # optional
+            # pool_type and pool_args are also allowed and are also optional
             replicants:
               -
                 - dbi:Pg:dbname=slave1
                 - user1
                 - password1
+                -
+                  quote_names: 1
+                  pg_enable_utf8: 1
               -
                 - dbi:Pg:dbname=slave2
                 - user2
                 - password2
+                -
+                  quote_names: 1
+                  pg_enable_utf8: 1
 
 =head2 alias
 

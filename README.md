@@ -4,7 +4,7 @@ Dancer::Plugin::DBIC - DBIx::Class interface for Dancer applications
 
 # VERSION
 
-version 0.2001
+version 0.2100
 
 # SYNOPSIS
 
@@ -124,16 +124,26 @@ Here is an example configuration that adds two read slaves:
           schema_class: MyApp::Schema
           dsn: dbi:Pg:dbname=master
           replicated:
-            balancer_type: ::Random  # defaults to '::Random' if not provided
+            balancer_type: ::Random     # optional
+            balancer_args:              # optional
+                auto_validate_every: 5  # optional
+                master_read_weight:1    # optional
+            # pool_type and pool_args are also allowed and are also optional
             replicants:
               -
                 - dbi:Pg:dbname=slave1
                 - user1
                 - password1
+                -
+                  quote_names: 1
+                  pg_enable_utf8: 1
               -
                 - dbi:Pg:dbname=slave2
                 - user2
                 - password2
+                -
+                  quote_names: 1
+                  pg_enable_utf8: 1
 
 ## alias
 
