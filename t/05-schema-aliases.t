@@ -1,8 +1,9 @@
 use Test::More tests => 4;
 
 use lib 't/lib';
-use Dancer qw(:syntax :tests);
+
 use Dancer::Plugin::DBIC qw(rset schema);
+use Dancer qw(:syntax :tests);
 use Test::Exception;
 
 eval { require DBD::SQLite };
