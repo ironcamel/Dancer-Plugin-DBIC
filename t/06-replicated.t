@@ -1,11 +1,12 @@
 use Test::More;
 
 use lib 't/lib';
-use Dancer qw(:syntax set);
-use Dancer::Plugin::DBIC qw(schema rset);
-use DBI;
-use File::Temp qw(tempfile);
+
 use Module::Load::Conditional qw(can_load);
+use Dancer::Plugin::DBIC qw(schema rset);
+use File::Temp qw(tempfile);
+use Dancer qw(:syntax set);
+use DBI;
 
 my $reqs = {
     'DBD::SQLite'                  => 0,
@@ -20,26 +21,33 @@ if ( can_load modules => $reqs ) {
     plan skip_all => "required modules to run these tests are not available";
 }
 
-my (undef, $dbfile1) = tempfile(SUFFIX => '.db');
-my (undef, $dbfile2) = tempfile(SUFFIX => '.db');
-my (undef, $dbfile3) = tempfile(SUFFIX => '.db');
-my $dbh2 = DBI->connect("dbi:SQLite:dbname=$dbfile2");
-my $dbh3 = DBI->connect("dbi:SQLite:dbname=$dbfile3");
-ok $dbh2->do('create table user (name varchar(100) primary key, age int)');
-ok $dbh3->do('create table user (name varchar(100) primary key, age int)');
-$dbh2->do('insert into user values(?,?)', {}, 'bob', 20);
-$dbh3->do('insert into user values(?,?)', {}, 'bob', 30);
+my $dbfiles = [
+    (tempfile(SUFFIX => '.db'))[1],
+    (tempfile(SUFFIX => '.db'))[1],
+    (tempfile(SUFFIX => '.db'))[1]
+];
+
+my $dbhandlers = [
+    DBI->connect("dbi:SQLite:dbname=$dbfiles->[1]"),
+    DBI->connect("dbi:SQLite:dbname=$dbfiles->[2]")
+];
+
+ok $dbhandlers->[0]->do('create table user (name varchar(100) primary key, age int)');
+ok $dbhandlers->[1]->do('create table user (name varchar(100) primary key, age int)');
+
+$dbhandlers->[0]->do('insert into user values(?,?)', {}, 'bob', 20);
+$dbhandlers->[1]->do('insert into user values(?,?)', {}, 'bob', 30);
 
 set plugins => {
     DBIC => {
         default => {
-            dsn          => "dbi:SQLite:dbname=$dbfile1",
+            dsn          => "dbi:SQLite:dbname=$dbfiles->[0]",
             schema_class => 'Foo',
             replicated => {
                 balancer_type => '::Random',
                 replicants => [
-                    [ "dbi:SQLite:dbname=$dbfile2" ],
-                    [ "dbi:SQLite:dbname=$dbfile3" ],
+                    [ "dbi:SQLite:dbname=$dbfiles->[1]" ],
+                    [ "dbi:SQLite:dbname=$dbfiles->[2]" ],
                 ],
             },
         },
@@ -68,4 +76,4 @@ is keys %set => 2, 'random balancer accessed both replicants'
     or diag explain \%set;
 ok $set{20} && $set{30};
 
-unlink $dbfile1, $dbfile2, $dbfile3;
+unlink @$dbfiles;

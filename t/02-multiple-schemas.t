@@ -9,19 +9,23 @@ use Test::Exception;
 eval { require DBD::SQLite };
 plan skip_all => 'DBD::SQLite required to run these tests' if $@;
 
-my (undef, $dbfile1) = tempfile(SUFFIX => '.db');
-my (undef, $dbfile2) = tempfile(SUFFIX => '.db');
+# tempfile() returns a file handler + a filename. 
+# We're only interested in storing the filename.
+my $dbfiles = [
+    (tempfile(SUFFIX => '.db'))[1],
+    (tempfile(SUFFIX => '.db'))[1]
+];
 
 subtest 'two schemas' => sub {
     set plugins => {
         DBIC => {
             foo => {
                 schema_class => 'Foo',
-                dsn =>  "dbi:SQLite:dbname=$dbfile1",
+                dsn =>  "dbi:SQLite:dbname=$dbfiles->[0]",
             },
             bar => {
                 schema_class => 'Foo',
-                dsn =>  "dbi:SQLite:dbname=$dbfile2",
+                dsn =>  "dbi:SQLite:dbname=$dbfiles->[1]",
             },
         }
     };
@@ -52,11 +56,11 @@ subtest 'two schemas with a default schema' => sub {
         DBIC => {
             default => {
                 schema_class => 'Foo',
-                dsn =>  "dbi:SQLite:dbname=$dbfile1",
+                dsn =>  "dbi:SQLite:dbname=$dbfiles->[0]",
             },
             bar => {
                 schema_class => 'Foo',
-                dsn =>  "dbi:SQLite:dbname=$dbfile2",
+                dsn =>  "dbi:SQLite:dbname=$dbfiles->[1]",
             },
         }
     };
@@ -65,4 +69,4 @@ subtest 'two schemas with a default schema' => sub {
     is $bob->age => 30;
 };
 
-unlink $dbfile1, $dbfile2;
+unlink @$dbfiles;

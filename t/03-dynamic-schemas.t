@@ -3,20 +3,15 @@
 
 use strict;
 use warnings;
-use Test::More;
+use Test::More tests => 3;
 
 use Dancer qw(:syntax !pass);
 use Dancer::Plugin::DBIC;
 use DBI;
 use File::Temp qw(tempfile);
-
-eval { require DBD::SQLite; require DBIx::Class::Schema::Loader };
-if ($@) {
-    plan skip_all =>
-        'DBD::SQLite and DBIx::Class::Schema::Loader required for these tests';
-} else {
-    plan tests => 3;
-}
+use Test::Requires qw(
+    DBD::SQLite DBIx::Class::Schema::Loader
+);
 
 my (undef, $dbfile) = tempfile SUFFIX => '.db';
 
@@ -37,6 +32,7 @@ my @users = ( ['bob', 40] );
 for my $user (@users) { $dbh->do('insert into user values(?,?)', {}, @$user) }
 
 my $user = schema('foo')->resultset('User')->find('bob');
+
 ok $user, 'Found bob.';
 is $user->age => '40', 'bob is even older';
 
