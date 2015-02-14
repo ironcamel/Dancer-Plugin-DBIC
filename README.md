@@ -4,7 +4,7 @@ Dancer::Plugin::DBIC - DBIx::Class interface for Dancer applications
 
 # VERSION
 
-version 0.2100
+version 0.2101
 
 # SYNOPSIS
 
@@ -29,17 +29,17 @@ version 0.2100
 
 # DESCRIPTION
 
-This plugin makes it very easy to create [Dancer](http://search.cpan.org/perldoc?Dancer) applications that interface
+This plugin makes it very easy to create [Dancer](https://metacpan.org/pod/Dancer) applications that interface
 with databases.
 It automatically exports the keyword `schema` which returns a
-[DBIx::Class::Schema](http://search.cpan.org/perldoc?DBIx::Class::Schema) object.
+[DBIx::Class::Schema](https://metacpan.org/pod/DBIx::Class::Schema) object.
 You just need to configure your database connection information.
 For performance, schema objects are cached in memory
 and are lazy loaded the first time they are accessed.
 
 # CONFIGURATION
 
-Configuration can be done in your [Dancer](http://search.cpan.org/perldoc?Dancer) config file.
+Configuration can be done in your [Dancer](https://metacpan.org/pod/Dancer) config file.
 
 ## simple example
 
@@ -70,25 +70,25 @@ In this example, there are 2 databases configured named `default` and `foo`:
             PrintError: 1
 
 Each database configured must at least have a dsn option.
-The dsn option should be the [DBI](http://search.cpan.org/perldoc?DBI) driver connection string.
+The dsn option should be the [DBI](https://metacpan.org/pod/DBI) driver connection string.
 All other options are optional.
 
 If you only have one schema configured, or one of them is named
 `default`, you can call `schema` without an argument to get the only
 or `default` schema, respectively.
 
-If a schema\_class option is not provided, then [DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader)
+If a schema\_class option is not provided, then [DBIx::Class::Schema::Loader](https://metacpan.org/pod/DBIx::Class::Schema::Loader)
 will be used to dynamically load the schema by introspecting the database
 corresponding to the dsn value.
-You need [DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader) installed for this to work.
+You need [DBIx::Class::Schema::Loader](https://metacpan.org/pod/DBIx::Class::Schema::Loader) installed for this to work.
 
 WARNING: Dynamic loading is not recommended for production environments.
 It is almost always better to provide a schema\_class option.
 
-The schema\_class option should be the name of your [DBIx::Class::Schema](http://search.cpan.org/perldoc?DBIx::Class::Schema) class.
-See ["SCHEMA GENERATION"](#SCHEMA GENERATION)
+The schema\_class option should be the name of your [DBIx::Class::Schema](https://metacpan.org/pod/DBIx::Class::Schema) class.
+See ["SCHEMA GENERATION"](#schema-generation)
 Optionally, a database configuration may have user, password, and options
-parameters as described in the documentation for `connect()` in [DBI](http://search.cpan.org/perldoc?DBI).
+parameters as described in the documentation for `connect()` in [DBI](https://metacpan.org/pod/DBI).
 
 ## connect\_info
 
@@ -114,8 +114,8 @@ You can also add database read slaves to your configuration with the
 This will automatically make your read queries go to a slave and your write
 queries go to the master.
 Keep in mind that this will require additional dependencies:
-[DBIx::Class::Optional::Dependencies\#Storage::Replicated](http://search.cpan.org/perldoc?DBIx::Class::Optional::Dependencies\#Storage::Replicated)
-See [DBIx::Class::Storage::DBI::Replicated](http://search.cpan.org/perldoc?DBIx::Class::Storage::DBI::Replicated) for more details.
+[DBIx::Class::Optional::Dependencies#Storage::Replicated](https://metacpan.org/pod/DBIx::Class::Optional::Dependencies#Storage::Replicated)
+See [DBIx::Class::Storage::DBI::Replicated](https://metacpan.org/pod/DBIx::Class::Storage::DBI::Replicated) for more details.
 Here is an example configuration that adds two read slaves:
 
     plugins:
@@ -174,7 +174,7 @@ file, as shown above.
 
     my $user = schema->resultset('User')->find('bob');
 
-The `schema` keyword returns a [DBIx::Class::Schema](http://search.cpan.org/perldoc?DBIx::Class::Schema) object ready for you to
+The `schema` keyword returns a [DBIx::Class::Schema](https://metacpan.org/pod/DBIx::Class::Schema) object ready for you to
 use.
 If you have configured only one database, then you can simply call `schema`
 with no arguments.
@@ -182,14 +182,14 @@ If you have configured multiple databases,
 you can still call `schema` with no arguments if there is a database
 named `default` in the configuration.
 With no argument, the `default` schema is returned.
-Otherwise, you __must__ provide `schema()` with the name of the database:
+Otherwise, you **must** provide `schema()` with the name of the database:
 
     my $user = schema('foo')->resultset('User')->find('bob');
 
 ## resultset
 
 This is a convenience method that will save you some typing.
-Use this __only__ when accessing the `default` schema.
+Use this **only** when accessing the `default` schema.
 
     my $user = resultset('User')->find('bob');
 
@@ -207,8 +207,8 @@ This is simply an alias for `resultset`.
 
 Setting the schema\_class option and having proper DBIx::Class classes
 is the recommended approach for performance and stability.
-You can use the [dbicdump](http://search.cpan.org/perldoc?dbicdump) command line tool provided by
-[DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader) to help you.
+You can use the [dbicdump](https://metacpan.org/pod/dbicdump) command line tool provided by
+[DBIx::Class::Schema::Loader](https://metacpan.org/pod/DBIx::Class::Schema::Loader) to help you.
 For example, if your app were named Foo, then you could run the following
 from the root of your project directory:
 
@@ -219,12 +219,12 @@ For this example, your `schema_class` setting would be `'Foo::Schema'`.
 # CONTRIBUTORS
 
 - Alexis Sukrieh <sukria@sukria.net>
-- Dagfinn Ilmari Mannsåker <[https://github.com/ilmari](https://github.com/ilmari)\>
+- Dagfinn Ilmari Mannsåker <[https://github.com/ilmari](https://github.com/ilmari)>
 - David Precious <davidp@preshweb.co.uk>
-- Fabrice Gabolde <[https://github.com/fgabolde](https://github.com/fgabolde)\>
+- Fabrice Gabolde <[https://github.com/fgabolde](https://github.com/fgabolde)>
 - Franck Cuny <franck@lumberjaph.net>
-- Steven Humphrey <[https://github.com/shumphrey](https://github.com/shumphrey)\>
-- Yanick Champoux <[https://github.com/yanick](https://github.com/yanick)\>
+- Steven Humphrey <[https://github.com/shumphrey](https://github.com/shumphrey)>
+- Yanick Champoux <[https://github.com/yanick](https://github.com/yanick)>
 
 # AUTHORS
 
