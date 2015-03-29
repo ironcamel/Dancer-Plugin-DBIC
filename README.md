@@ -12,13 +12,14 @@ version 0.2102
     use Dancer::Plugin::DBIC qw(schema resultset rset);
 
     get '/users/:user_id' => sub {
-        my $user = schema('default')->resultset('User')->find(param 'user_id');
+        my $user_id = param 'user_id';
+        my $user;
 
-        # If you are accessing the 'default' schema, then all the following
-        # are equivalent to the above:
-        $user = schema->resultset('User')->find(param 'user_id');
-        $user = resultset('User')->find(param 'user_id');
-        $user = rset('User')->find(param 'user_id');
+        # all of the following are equivalent:
+        $user = schema('default')->resultset('User')->find($user_id);
+        $user = schema->resultset('User')->find($user_id);
+        $user = resultset('User')->find($user_id);
+        $user = rset('User')->find($user_id);
 
         template user_profile => {
             user => $user
