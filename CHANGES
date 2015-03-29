@@ -1,10 +1,31 @@
 ==================================================
-Changes from 2005-02-16 00:00:00 +0000 to present.
+Changes from 2005-03-31 00:00:00 +0000 to present.
 ==================================================
 
 -------------------------------------------
-version 0.2101 at 2015-02-14 02:51:01 +0000
+version 0.2102 at 2015-03-29 09:43:56 +0000
 -------------------------------------------
+
+  Change: f50805e2862779940f42a8b80a2d2f8a9bfd6101
+  Author: Naveed Massjouni <naveed@vt.edu>
+  Date : 2015-03-29 05:41:43 +0000
+
+    this plugin is now a thin wrapper around DBICx::Sugar
+
+    I created DBICx::Sugar to factor out the code duplication between
+    Dancer::Plugin::DBIC and Dancer2::Plugin::DBIC. Now this plugin is
+    just a thin wrapper around DBICx::Sugar. 
+
+-------------------------------------------
+version 0.2101 at 2015-02-14 02:52:24 +0000
+-------------------------------------------
+
+  Change: b4b29aa82925bc53370ae15aa66e897085c31db5
+  Author: Naveed Massjouni <naveed@vt.edu>
+  Date : 2015-02-13 21:52:24 +0000
+
+    updated SQL::Translator version requirement to fix cpantesters
+    failures 
 
   Change: 2ee1a4bfad6362fad5907dfe85fb8d866835cef6
   Author: Naveed Massjouni <naveedm9@gmail.com>

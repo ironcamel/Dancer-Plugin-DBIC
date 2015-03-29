@@ -4,7 +4,7 @@ Dancer::Plugin::DBIC - DBIx::Class interface for Dancer applications
 
 # VERSION
 
-version 0.2101
+version 0.2102
 
 # SYNOPSIS
 
@@ -36,6 +36,8 @@ It automatically exports the keyword `schema` which returns a
 You just need to configure your database connection information.
 For performance, schema objects are cached in memory
 and are lazy loaded the first time they are accessed.
+
+This plugin is now just a thin wrapper around [DBICx::Sugar](https://metacpan.org/pod/DBICx::Sugar).
 
 # CONFIGURATION
 
@@ -215,6 +217,10 @@ from the root of your project directory:
     dbicdump -o dump_directory=./lib Foo::Schema dbi:SQLite:/path/to/foo.db
 
 For this example, your `schema_class` setting would be `'Foo::Schema'`.
+
+# SEE ALSO
+
+- [DBICx::Sugar](https://metacpan.org/pod/DBICx::Sugar)
 
 # CONTRIBUTORS
 

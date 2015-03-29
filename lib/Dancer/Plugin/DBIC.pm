@@ -7,81 +7,23 @@ use warnings;
 use utf8;
 use Dancer::Plugin;
 use Module::Load;
+use DBICx::Sugar;
 
-my $schemas = {};
-
-sub schema {
+sub _schema {
     my ($self, $name) = plugin_args(@_);
-    my $cfg = plugin_setting;
-
-    if (not defined $name) {
-        if (keys %$cfg == 1) {
-            ($name) = keys %$cfg;
-        } elsif (keys %$cfg) {
-            $name = "default";
-        } else {
-            die "No schemas are configured";
-        }
-    }
-
-    return $schemas->{$name} if $schemas->{$name};
-
-    my $options = $cfg->{$name} or die "The schema $name is not configured";
-    if ( my $alias = $options->{alias} ) {
-        $options = $cfg->{$alias}
-            or die "The schema alias $alias does not exist in the config";
-        return $schemas->{$alias} if $schemas->{$alias};
-    }
-
-    my @conn_info = $options->{connect_info}
-        ? @{$options->{connect_info}}
-        : @$options{qw(dsn user password options)};
-    if ( exists $options->{pass} ) {
-        warn "The pass option is deprecated. Use password instead.";
-        $conn_info[2] = $options->{pass};
-    }
-
-    my $schema;
-
-    if ( my $schema_class = $options->{schema_class} ) {
-        $schema_class =~ s/-/::/g;
-        eval { load $schema_class };
-        die "Could not load schema_class $schema_class: $@" if $@;
-        if ( my $replicated = $options->{replicated} ) {
-            $schema = $schema_class->clone;
-            my %storage_options;
-            my @params = qw( balancer_type balancer_args pool_type pool_args );
-            for my $p ( @params ) {
-                my $value = $replicated->{$p};
-                $storage_options{$p} = $value if defined $value;
-            }
-            $schema->storage_type([ '::DBI::Replicated', \%storage_options ]);
-            $schema->connection( @conn_info );
-            $schema->storage->connect_replicants( @{$replicated->{replicants}});
-        } else {
-            $schema = $schema_class->connect( @conn_info );
-        }
-    } else {
-        my $dbic_loader = 'DBIx::Class::Schema::Loader';
-        eval { load $dbic_loader };
-        die "You must provide a schema_class option or install $dbic_loader."
-            if $@;
-        $dbic_loader->naming( $options->{schema_loader_naming} || 'v7' );
-        $schema = DBIx::Class::Schema::Loader->connect(@conn_info);
-    }
-
-    return $schemas->{$name} = $schema;
+    DBICx::Sugar::config( plugin_setting );
+    return DBICx::Sugar::schema($name);
 };
 
-sub resultset {
+sub _rset {
     my ($self, $rset_name) = plugin_args(@_);
-    return schema->resultset($rset_name);
+    return DBICx::Sugar::schema->resultset($rset_name);
 }
 
-register schema    => \&schema;
-register resultset => \&resultset;
-register rset      => \&resultset;
-register_plugin for_versions => [ 1, 2 ];
+register schema    => \&_schema;
+register resultset => \&_rset;
+register rset      => \&_rset;
+register_plugin;
 
 # ABSTRACT: DBIx::Class interface for Dancer applications
 
@@ -117,6 +59,8 @@ L<DBIx::Class::Schema> object.
 You just need to configure your database connection information.
 For performance, schema objects are cached in memory
 and are lazy loaded the first time they are accessed.
+
+This plugin is now just a thin wrapper around L<DBICx::Sugar>.
 
 =head1 CONFIGURATION
 
@@ -296,6 +240,16 @@ from the root of your project directory:
     dbicdump -o dump_directory=./lib Foo::Schema dbi:SQLite:/path/to/foo.db
 
 For this example, your C<schema_class> setting would be C<'Foo::Schema'>.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item *
+
+L<DBICx::Sugar>
+
+=back
 
 =head1 CONTRIBUTORS
 
