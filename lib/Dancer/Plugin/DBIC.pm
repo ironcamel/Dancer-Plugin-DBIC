@@ -17,7 +17,7 @@ sub _schema {
 
 sub _rset {
     my ($self, $rset_name) = plugin_args(@_);
-    return DBICx::Sugar::schema->resultset($rset_name);
+    return schema()->resultset($rset_name);
 }
 
 register schema    => \&_schema;
