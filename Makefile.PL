@@ -21,7 +21,6 @@ my %WriteMakefileArgs = (
     "DBICx::Sugar" => 0,
     "Dancer" => "1.3098",
     "Dancer::Plugin" => 0,
-    "Module::Load" => 0,
     "strict" => 0,
     "utf8" => 0,
     "warnings" => 0
@@ -44,7 +43,7 @@ my %WriteMakefileArgs = (
     "base" => 0,
     "lib" => 0
   },
-  "VERSION" => "0.2103",
+  "VERSION" => "0.2104",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -65,7 +64,6 @@ my %FallbackPrereqs = (
   "File::Temp" => 0,
   "IO::Handle" => 0,
   "IPC::Open3" => 0,
-  "Module::Load" => 0,
   "Module::Load::Conditional" => 0,
   "Test::Exception" => 0,
   "Test::More" => 0,
