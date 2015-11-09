@@ -7,7 +7,6 @@ use warnings;
 use utf8;
 use Dancer::Plugin;
 use DBICx::Sugar;
-use Module::Load;
 
 sub _schema {
     my ($name) = @_;
