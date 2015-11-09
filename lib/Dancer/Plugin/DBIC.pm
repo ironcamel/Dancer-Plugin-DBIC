@@ -6,18 +6,18 @@ use strict;
 use warnings;
 use utf8;
 use Dancer::Plugin;
-use Module::Load;
 use DBICx::Sugar;
+use Module::Load;
 
 sub _schema {
-    my ($self, $name) = plugin_args(@_);
+    my ($name) = @_;
     DBICx::Sugar::config( plugin_setting );
     return DBICx::Sugar::schema($name);
 };
 
 sub _rset {
-    my ($self, $rset_name) = plugin_args(@_);
-    return schema()->resultset($rset_name);
+    my ($rset_name) = @_;
+    return _schema()->resultset($rset_name);
 }
 
 register schema    => \&_schema;
