@@ -5,7 +5,7 @@ use lib 't/lib';
 use Dancer::Test apps => [ 't::lib::TestApp' ];
 use Dancer::Plugin::DBIC qw(rset schema);
 use Dancer qw(:syntax :tests);
-use t::lib::TestApp;
+use TestApp;
 
 eval { require DBD::SQLite };
 plan skip_all => 'DBD::SQLite required to run these tests' if $@;
